@@ -41,8 +41,8 @@ class RpcClient extends Command
         $comment = $this->ask('备注(comment)：');
         $num = 0;
         do{
-            $appid = Str::random(16);
-            $secret = Str::random(32);
+            $appid = strtolower(Str::random(16));
+            $secret = strtolower(Str::random(32));
 
             $client = Client::firstOrCreate([
                 'appid'=>$appid
@@ -81,7 +81,7 @@ class RpcClient extends Command
         $this->line('comment:'.$client->comment);
         $this->line("===============================================");
         if ($this->confirm('是否重新生成密钥？(Whether to regenerate the secret)', false)) {
-            $client->secret = Str::random(32);
+            $client->secret = strtolower(Str::random(32));
             $client->save();
             $this->info('新密钥（new secret）：'.$client->secret);
         }
