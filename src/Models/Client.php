@@ -11,6 +11,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Client extends Model
 {
+    protected $guarded = [];
+
     public function __construct(array $attributes = [])
     {
         $this->setConnection(config('laravelrpc.database.connnection'));
