@@ -45,8 +45,8 @@ class RpcClient extends Command
             $secret = Str::random(32);
 
             $client = Client::firstOrCreate([
-                'appid'=>$appid,'secret'=>$secret
-            ],['comment'=>$comment]);
+                'appid'=>$appid
+            ],['secret'=>$secret,'comment'=>$comment]);
             if ($client && $client->wasRecentlyCreated){
                 break;
             }
