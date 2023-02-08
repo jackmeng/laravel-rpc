@@ -6,6 +6,7 @@
  */
 
 return [
+    "status"=>true,
     "root"=>[
         "dir"=>"app\RPC",
         "namespace"=>'App\\RPC\\',

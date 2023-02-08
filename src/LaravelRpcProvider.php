@@ -6,6 +6,7 @@ use Illuminate\Support\ServiceProvider;
 use LaravelRpc\Console\Commands\RpcClient;
 use LaravelRpc\Console\Commands\RpcClients;
 use LaravelRpc\Http\Controllers\RpcController;
+use LaravelRpc\Http\Middleware\SignatureCheck;
 
 /**
  *
@@ -26,11 +27,11 @@ class LaravelRpcProvider extends ServiceProvider
 
             $this->publishes([
                 __DIR__.'/../database/migrations' => database_path('migrations'),
-            ], 'laravel-rpc-migrations');
+            ]);
 
             $this->publishes([
                 __DIR__.'/../config/laravel_rpc.php' => config_path('laravel_rpc.php'),
-            ], 'laravel-rpc-config');
+            ]);
 
             $this->commands([
                 RpcClient::class,
@@ -53,12 +54,12 @@ class LaravelRpcProvider extends ServiceProvider
 
     protected function defineRoutes()
     {
-        if (app()->routesAreCached() || config('sanctum.routes') === false) {
+        if (app()->routesAreCached() || config('laravel_rpc.status') === false) {
             return;
         }
 
         Route::group(['prefix' => config('laravel_rpc.prefix', 'rpc')], function () {
-            Route::post('/server',[RpcController::class,'request'] )->middleware('web');
+            Route::post('/server',[RpcController::class,'request'] )->middleware(SignatureCheck::class);
         });
     }
 }
