@@ -1,0 +1,29 @@
+{
+    "name": "jackmeng/laravel-rpc",
+    "description": "用于对外提供rpc服务",
+    "type": "library",
+    "keywords": ["laravel", "rpc"],
+    "homepage": "https://github.com/jackmeng/laravel-rpc/",
+    "autoload": {
+        "psr-4": {
+            "LaravelRpc\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "jackmeng",
+            "email": "jiekemeng@gmail.com",
+            "homepage": "https://www.jackmeng.com"
+        }
+    ],
+    "require-dev": {
+        "laravel/framework": "^8.0"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "LaravelRpc\\LaravelRpcProvider"
+            ]
+        }
+    }
+}
