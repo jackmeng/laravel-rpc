@@ -31,15 +31,15 @@ class Client
 
     public function server($server)
     {
-        $server = config('laravel_rpc.servers.'.$server);
-        if (empty($server)){
+        $server_config = config('laravel_rpc.servers.'.$server);
+        if (empty($server_config)){
             throw new ServerConfigDoesNotExistException();
         }
         $this->server = $server;
-        $this->setDomain($server['domain']??'');
-        $this->setAppid($server['appid']??'');
-        $this->setSecret($server['secret']??'');
-        $this->setPrefix($server['prefix']??'');
+        $this->setDomain($server_config['domain']??'');
+        $this->setAppid($server_config['appid']??'');
+        $this->setSecret($server_config['secret']??'');
+        $this->setPrefix($server_config['prefix']??'');
 
         return $this;
     }
@@ -90,7 +90,7 @@ class Client
     {
         $this->request_params['sign'] = (new Params())->signature($this->request_params,$this->secret);
 
-        return Http::post($this->domain, $this->request_params);
+        return Http::post($this->getUrl(), $this->request_params);
     }
 
     protected function getUrl()

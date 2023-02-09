@@ -31,7 +31,11 @@ class Params
                 $strKey = empty($parent_key)?$key:$parent_key.'['.$key.']';
             }
             if (is_array($value)){
-               $str = '&'.$this->buildString($value,$strKey);
+                if (empty($value)){
+                    $str = '&'.$strKey.'=[]';
+                }else{
+                    $str = '&'.$this->buildString($value,$strKey);
+                }
             }elseif(is_string($value) || is_int($value) || is_float($value)){
                 $str = '&'.$strKey.'='.$value;
             }elseif(is_bool($value)){
