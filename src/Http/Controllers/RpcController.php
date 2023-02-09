@@ -17,9 +17,8 @@ class RpcController extends Controller
         $method = $request->input('method');
         $params = $request->input('params');
         $controller = str_replace('/','\\',$controller);
-        $controller = config('laravelrpc.root.namespace').$controller.'Controller';
+        $controller = config('laravel_rpc.root.namespace').'Controllers\\'.$controller.'Controller';
 
-        // 验证参数签名
 
         // 检测controller是否存在
         if(!class_exists($controller)){
@@ -30,7 +29,16 @@ class RpcController extends Controller
             return $this->error('方法不存在');
         }
         try{
-            return app()->make($controller)->{$method}(...$params);
+            $controller_obj = app()->make($controller);
+            $method_params = (new \ReflectionMethod($controller_obj,$method))->getParameters();
+            $args = [];
+            foreach($method_params as $param){
+                if(!$param->isDefaultValueAvailable() && !isset($params[$param->name])){
+                    return $this->error('请传入参数：'.$param->name);
+                }
+                $args[] = $params[$param->name]??$param->getDefaultValue();
+            }
+            return $controller_obj->{$method}(...$args);
         }catch (\Throwable $e){
             if (app()->hasDebugModeEnabled() || app()->isLocal()){
                 return $this->error($e->getMessage(),500,[

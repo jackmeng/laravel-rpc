@@ -79,7 +79,7 @@ class Client
         return $this;
     }
 
-    public function method($method, $params): \Illuminate\Http\Client\Response
+    public function method($method, $params=[]): \Illuminate\Http\Client\Response
     {
         $this->request_params['method'] = $method;
         $this->request_params['params'] = $params;
