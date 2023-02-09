@@ -17,17 +17,19 @@ class LaravelRpcProvider extends ServiceProvider
 {
     public function register()
     {
-
+        if (!app()->configurationIsCached()) {
+            $this->mergeConfigFrom(__DIR__.'/../config/laravel_rpc.php', 'laravel_rpc');
+        }
     }
 
     public function boot()
     {
         if (app()->runningInConsole()) {
-            $this->registerMigrations();
+//            $this->registerMigrations();
 
             $this->publishes([
                 __DIR__.'/../database/migrations' => database_path('migrations'),
-            ]);
+            ],'laravel_rpc_migration');
 
             $this->publishes([
                 __DIR__.'/../config/laravel_rpc.php' => config_path('laravel_rpc.php'),
@@ -43,7 +45,7 @@ class LaravelRpcProvider extends ServiceProvider
     }
 
     /**
-     * Register Sanctum's migration files.
+     * Register laravel rpc migration files.
      *
      * @return void
      */

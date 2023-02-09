@@ -8,6 +8,7 @@
 namespace LaravelRpc;
 
 use Illuminate\Support\Facades\Http;
+use LaravelRpc\Exceptions\ServerConfigDoesNotExistException;
 
 class Client
 {
@@ -16,14 +17,31 @@ class Client
     protected string $appid = '';
     protected string $secret = '';
     protected string $prefix = '';
+    protected string $server = '';
 
-    public function __construct($domain='',$appid='',$secret='',$prefix='rpc')
+    public function __construct($server='')
     {
-        $this->setDomain($domain);
-        $this->setAppid($appid);
-        $this->setSecret($secret);
-        $this->setPrefix($prefix);
+        if (!empty($server)){
+            $this->server($server);
+        }elseif(!empty($this->server)){
+            $this->server($this->server);
+        }
         $this->controller(class_basename(static::class));
+    }
+
+    public function server($server)
+    {
+        $server = config('laravel_rpc.servers.'.$server);
+        if (empty($server)){
+            throw new ServerConfigDoesNotExistException();
+        }
+        $this->server = $server;
+        $this->setDomain($server['domain']??'');
+        $this->setAppid($server['appid']??'');
+        $this->setSecret($server['secret']??'');
+        $this->setPrefix($server['prefix']??'');
+
+        return $this;
     }
 
     public function setDomain($domain)
