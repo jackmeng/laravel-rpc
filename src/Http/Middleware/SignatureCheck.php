@@ -25,7 +25,7 @@ class SignatureCheck
             return Response::error('未找到客户端信息');
         }
         $secret = $client->secret;
-        $inputParams = $request->except('secret');
+        $inputParams = $request->except('sign');
         $sign = $request->input('sign');
         if((new Params())->check($inputParams,$secret,$sign)){
             return $next($request);
