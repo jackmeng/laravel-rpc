@@ -8,6 +8,7 @@
 namespace LaravelRpc;
 
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 use LaravelRpc\Exceptions\ServerConfigDoesNotExistException;
 
 class Client
@@ -88,6 +89,7 @@ class Client
 
     protected function request(): \Illuminate\Http\Client\Response
     {
+        $this->request_params['nonce_str'] = Str::random();
         $this->request_params['sign'] = (new Params())->signature($this->request_params,$this->secret);
 
         return Http::post($this->getUrl(), $this->request_params);
