@@ -31,7 +31,14 @@ class Client
         $this->service(class_basename(static::class));
     }
 
-    public function server($server): static
+    /**
+     * @param $server
+     * @return $this
+     * @throws ServerConfigDoesNotExistException
+     * @author jackmeng <jiekemeng@gmail.com>
+     * @date 2023/2/10 0010 11:48
+     */
+    public function server($server)
     {
         $server_config = config('laravel_rpc.servers.'.$server);
         if (empty($server_config)){
@@ -46,13 +53,25 @@ class Client
         return $this;
     }
 
-    public function setDomain($domain): static
+    /**
+     * @param $domain
+     * @return $this
+     * @author jackmeng <jiekemeng@gmail.com>
+     * @date 2023/2/10 0010 11:49
+     */
+    public function setDomain($domain)
     {
         $this->domain = rtrim($domain,'/');
         return $this;
     }
 
-    public function setAppid($appid): static
+    /**
+     * @param $appid
+     * @return $this
+     * @author jackmeng <jiekemeng@gmail.com>
+     * @date 2023/2/10 0010 11:49
+     */
+    public function setAppid($appid)
     {
         $this->request_params['appid'] = $appid;
         $this->appid = $appid;
@@ -60,27 +79,52 @@ class Client
         return $this;
     }
 
-    public function setSecret($secret): static
+    /**
+     * @param $secret
+     * @return $this
+     * @author jackmeng <jiekemeng@gmail.com>
+     * @date 2023/2/10 0010 11:49
+     */
+    public function setSecret($secret)
     {
         $this->secret = $secret;
 
         return $this;
     }
 
-    public function setPrefix($prefix): static
+    /**
+     * @param $prefix
+     * @return $this
+     * @author jackmeng <jiekemeng@gmail.com>
+     * @date 2023/2/10 0010 11:49
+     */
+    public function setPrefix($prefix)
     {
         $this->prefix = trim($prefix,'/');
 
         return $this;
     }
 
-    public function header($key,$value): static
+    /**
+     * @param $key
+     * @param $value
+     * @return $this
+     * @author jackmeng <jiekemeng@gmail.com>
+     * @date 2023/2/10 0010 11:49
+     */
+    public function header($key,$value)
     {
         $this->headers[$key] = $value;
         return $this;
     }
 
-    public function service($service): Client
+    /**
+     * @param $service
+     * @return $this
+     * @author jackmeng <jiekemeng@gmail.com>
+     * @date 2023/2/10 0010 11:49
+     */
+    public function service($service)
     {
         $this->request_params['service'] = $service;
         return $this;
@@ -102,7 +146,7 @@ class Client
         return Http::withHeaders($this->headers)->post($this->getUrl(), $this->request_params);
     }
 
-    protected function getUrl()
+    protected function getUrl(): string
     {
         return $this->domain.'/'.$this->prefix.'/server';
     }

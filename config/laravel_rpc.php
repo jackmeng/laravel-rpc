@@ -8,7 +8,7 @@
 return [
     "status"=>true,
     "root"=>[
-        "dir"=>"app\RPC",
+        "dir"=>"app/RPC",
         "namespace"=>'App\\RPC\\',
     ],
     "database"=>[
