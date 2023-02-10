@@ -14,6 +14,7 @@ use LaravelRpc\Exceptions\ServerConfigDoesNotExistException;
 class Client
 {
     protected array $request_params = [];
+    protected array $headers = [];
     protected string $domain = '';
     protected string $appid = '';
     protected string $secret = '';
@@ -30,7 +31,7 @@ class Client
         $this->service(class_basename(static::class));
     }
 
-    public function server($server)
+    public function server($server): static
     {
         $server_config = config('laravel_rpc.servers.'.$server);
         if (empty($server_config)){
@@ -45,13 +46,13 @@ class Client
         return $this;
     }
 
-    public function setDomain($domain)
+    public function setDomain($domain): static
     {
         $this->domain = rtrim($domain,'/');
         return $this;
     }
 
-    public function setAppid($appid)
+    public function setAppid($appid): static
     {
         $this->request_params['appid'] = $appid;
         $this->appid = $appid;
@@ -59,17 +60,23 @@ class Client
         return $this;
     }
 
-    public function setSecret($secret)
+    public function setSecret($secret): static
     {
         $this->secret = $secret;
 
         return $this;
     }
 
-    public function setPrefix($prefix)
+    public function setPrefix($prefix): static
     {
         $this->prefix = trim($prefix,'/');
 
+        return $this;
+    }
+
+    public function header($key,$value): static
+    {
+        $this->headers[$key] = $value;
         return $this;
     }
 
@@ -92,7 +99,7 @@ class Client
         $this->request_params['nonce_str'] = Str::random();
         $this->request_params['sign'] = (new Params())->signature($this->request_params,$this->secret);
 
-        return Http::post($this->getUrl(), $this->request_params);
+        return Http::withHeaders($this->headers)->post($this->getUrl(), $this->request_params);
     }
 
     protected function getUrl()
