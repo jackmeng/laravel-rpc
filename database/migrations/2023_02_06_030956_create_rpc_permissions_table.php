@@ -26,7 +26,7 @@ class CreateRpcPermissionsTable extends Migration
         Schema::create($this->table_name, function (Blueprint $table) {
             $table->id();
             $table->string('appid',32)->default(0);
-            $table->string('controller',100)->default('');
+            $table->string('service',100)->default('');
             $table->string('method',100)->default('');
             $table->timestamps();
         });

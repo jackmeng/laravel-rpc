@@ -27,7 +27,7 @@ class Client
         }elseif(!empty($this->server)){
             $this->server($this->server);
         }
-        $this->controller(class_basename(static::class));
+        $this->service(class_basename(static::class));
     }
 
     public function server($server)
@@ -73,9 +73,9 @@ class Client
         return $this;
     }
 
-    public function controller($controller): Client
+    public function service($service): Client
     {
-        $this->request_params['controller'] = $controller;
+        $this->request_params['service'] = $service;
         return $this;
     }
 

@@ -8,29 +8,30 @@
 namespace LaravelRpc\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controller;
 
 class RpcController extends Controller
 {
     public function request(Request $request)
     {
-        $controller = $request->input('controller');
+        $service = $request->input('service');
         $method = $request->input('method');
         $params = $request->input('params');
-        $controller = str_replace('/','\\',$controller);
-        $controller = config('laravel_rpc.root.namespace').'Controllers\\'.$controller.'Controller';
+        $service = str_replace('/','\\',$service);
+        $service = config('laravel_rpc.root.namespace').'Services\\'.$service;
 
 
         // 检测controller是否存在
-        if(!class_exists($controller)){
-            return $this->error('控制器不存在');
+        if(!class_exists($service)){
+            return $this->error('service不存在');
         }
         // 检测action是否存在
-        if(!method_exists($controller,$method)){
-            return $this->error('方法不存在');
+        if(!method_exists($service,$method)){
+            return $this->error('method 不存在');
         }
         try{
-            $controller_obj = app()->make($controller);
-            $method_params = (new \ReflectionMethod($controller_obj,$method))->getParameters();
+            $service_obj = app()->make($service);
+            $method_params = (new \ReflectionMethod($service_obj,$method))->getParameters();
             $args = [];
             foreach($method_params as $param){
                 if(!$param->isDefaultValueAvailable() && !isset($params[$param->name])){
@@ -38,7 +39,7 @@ class RpcController extends Controller
                 }
                 $args[] = $params[$param->name]??$param->getDefaultValue();
             }
-            return $controller_obj->{$method}(...$args);
+            return $service_obj->{$method}(...$args);
         }catch (\Throwable $e){
             if (app()->hasDebugModeEnabled() || app()->isLocal()){
                 return $this->error($e->getMessage(),500,[

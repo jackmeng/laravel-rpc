@@ -20,13 +20,13 @@ class Permissions
     public function handle(Request $request, Closure $next)
     {
         $appid = $request->input('appid');
-        $controller = $request->input('controller');
+        $service = $request->input('service');
         $method = $request->input('method');
-        $permissions = PermissionsModel::where('appid',$appid)->where(function($query) use ($controller,$method){
-            $query->where('controller','*')->orWhere(function($query) use ($controller){
-                $query->where('controller',$controller)->where('method','*');
-            })->orWhere(function($query)use($controller,$method){
-                $query->where('controller',$controller)->where('method',$method);
+        $permissions = PermissionsModel::where('appid',$appid)->where(function($query) use ($service,$method){
+            $query->where('service','*')->orWhere(function($query) use ($service){
+                $query->where('service',$service)->where('method','*');
+            })->orWhere(function($query)use($service,$method){
+                $query->where('service',$service)->where('method',$method);
             });
         })->first();
         if ($permissions){

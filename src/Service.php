@@ -2,15 +2,12 @@
 /**
  *
  * @author jackmeng <jiekemeng@gmail.com>
- * @date 2023/2/6 0006 14:34
+ * @date 2023/2/10 0010 9:46
  */
 
-namespace LaravelRpc\Http\Controllers;
+namespace LaravelRpc;
 
-use Illuminate\Routing\Controller as BaseController;
-use LaravelRpc\Response;
-
-class Controller extends BaseController
+class Service
 {
     protected function success($data=[],$message='SUCCESS',$code=200)
     {
