@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use LaravelRpc\Console\Commands\RpcClient;
 use LaravelRpc\Console\Commands\RpcClients;
+use LaravelRpc\Console\Commands\RpcGenerateKey;
 use LaravelRpc\Http\Controllers\RpcController;
 use LaravelRpc\Http\Middleware\Fixed;
 use LaravelRpc\Http\Middleware\SignatureCheck;
@@ -39,6 +40,7 @@ class LaravelRpcProvider extends ServiceProvider
             $this->commands([
                 RpcClient::class,
                 RpcClients::class,
+                RpcGenerateKey::class,
             ]);
         }
 
