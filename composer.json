@@ -1,6 +1,7 @@
 {
     "name": "jackmeng/laravel-rpc",
     "description": "用于对外提供rpc服务",
+    "license": "MIT",
     "type": "library",
     "keywords": ["laravel", "rpc"],
     "homepage": "https://github.com/jackmeng/laravel-rpc/",

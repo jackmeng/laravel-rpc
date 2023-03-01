@@ -7,6 +7,7 @@
 
 namespace LaravelRpc;
 
+use Illuminate\Encryption\Encrypter;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use LaravelRpc\Exceptions\ServerConfigDoesNotExistException;
@@ -20,6 +21,13 @@ class Client
     protected string $secret = '';
     protected string $prefix = '';
     protected string $server = '';
+
+    /**
+     * sign 注册客户端，利用appid 和 secret 验证签名
+     * fixed 利用aes加密，进行双向通信
+     */
+    protected string $verifyType = 'sign';
+    protected string $verifyKey = '';
 
     public function __construct($server='')
     {
@@ -49,6 +57,7 @@ class Client
         $this->setAppid($server_config['appid']??'');
         $this->setSecret($server_config['secret']??'');
         $this->setPrefix($server_config['prefix']??'');
+        $this->setVerifyKey($server_config['verify_key']??'');
 
         return $this;
     }
@@ -107,6 +116,19 @@ class Client
 
     /**
      * @param $key
+     * @return $this
+     * @author jackmeng <jiekemeng@gmail.com>
+     * @date 2023/2/28 0028 17:54
+     */
+    public function setVerifyKey($key)
+    {
+        $this->verifyKey = $key;
+
+        return $this;
+    }
+
+    /**
+     * @param $key
      * @param $value
      * @return $this
      * @author jackmeng <jiekemeng@gmail.com>
@@ -140,10 +162,27 @@ class Client
 
     protected function request(): \Illuminate\Http\Client\Response
     {
+        $this->header('verify-type',$this->verifyType);
+
+        if ($this->verifyType === 'sign'){
+            return $this->verifySign();
+        }elseif($this->verifyType === 'fixed'){
+            return $this->verifyFixed();
+        }
+
+    }
+
+    protected function verifySign()
+    {
         $this->request_params['nonce_str'] = Str::random();
         $this->request_params['sign'] = (new Params())->signature($this->request_params,$this->secret);
-
         return Http::withHeaders($this->headers)->post($this->getUrl(), $this->request_params);
+    }
+
+    protected function verifyFixed()
+    {
+        $encryptParams = (new Encrypter(config('laravel_rpc.verify_key'),config('laravel_rpc.verify_cipher')))->encrypt($this->request_params);
+        return Http::withHeaders($this->headers)->withBody($encryptParams,'text/plain')->post($this->getUrl());
     }
 
     protected function getUrl(): string

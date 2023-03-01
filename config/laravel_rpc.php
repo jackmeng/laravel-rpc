@@ -7,6 +7,12 @@
 
 return [
     "status"=>true,
+    "verify_key"=>'',
+    /**
+     * 加密方式，支持以下几种
+     * aes-128-cbc | aes-256-cbc | aes-128-gcm | aes-256-gcm
+     */
+    "verify_cipher"=>'aes-256-cbc',
     "root"=>[
         "dir"=>"app/RPC",
         "namespace"=>'App\\RPC\\',
