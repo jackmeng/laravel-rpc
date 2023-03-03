@@ -181,12 +181,12 @@ class Client
 
     protected function verifyFixed()
     {
-        $encryptParams = (new Encrypter(config('laravel_rpc.verify_key'),config('laravel_rpc.verify_cipher')))->encrypt($this->request_params);
+        $encryptParams = (new Encrypter(base64_decode(config('laravel_rpc.verify_key')),config('laravel_rpc.verify_cipher')))->encrypt($this->request_params);
         return Http::withHeaders($this->headers)->withBody($encryptParams,'text/plain')->post($this->getUrl());
     }
 
     protected function getUrl(): string
     {
-        return $this->domain.'/'.$this->prefix.'/server';
+        return $this->domain.'/'.$this->prefix.'/server/'.$this->verifyType;
     }
 }

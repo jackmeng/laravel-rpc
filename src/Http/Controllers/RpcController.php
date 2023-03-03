@@ -12,7 +12,7 @@ use Illuminate\Routing\Controller;
 
 class RpcController extends Controller
 {
-    public function sign(Request $request)
+    public function request(Request $request)
     {
         $service = $request->input('service');
         $method = $request->input('method');
