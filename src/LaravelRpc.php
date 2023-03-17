@@ -2,24 +2,24 @@
 /**
  *
  * @author jackmeng <jiekemeng@gmail.com>
- * @date 2023/2/6 0006 14:22
+ * @date 2023/3/17 0017 16:32
  */
 
-namespace LaravelRpc\Http\Controllers;
+namespace LaravelRpc;
 
 use Illuminate\Http\Request;
-use Illuminate\Routing\Controller;
 
-class RpcController extends Controller
+class LaravelRpc
 {
-    public function request(Request $request)
+    use ResponseTrait;
+
+    public function handle(Request $request): \Illuminate\Http\JsonResponse
     {
         $service = $request->input('service');
         $method = $request->input('method');
         $params = $request->input('params');
         $service = str_replace('/','\\',$service);
         $service = config('laravel_rpc.root.namespace').'Services\\'.$service;
-
 
         // 检测controller是否存在
         if(!class_exists($service)){
@@ -33,6 +33,9 @@ class RpcController extends Controller
             $service_obj = app()->make($service);
             $method_params = (new \ReflectionMethod($service_obj,$method))->getParameters();
             $args = [];
+            // TODO: 如果参数有key ,就按key解析
+            // TODO: 如果没有key，则按顺序传入
+            // TODO: 如果是 string，int，boolean，则核对参数类型后传入
             foreach($method_params as $param){
                 if(!$param->isDefaultValueAvailable() && !isset($params[$param->name])){
                     return $this->error('请传入参数：'.$param->name);

@@ -1,21 +1,22 @@
 <?php
 
 
-namespace LaravelRpc\Http\Middleware;
+namespace LaravelRpc\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
 use LaravelRpc\Models\Permissions as PermissionsModel;
-use LaravelRpc\Response;
+use LaravelRpc\ResponseTrait;
 
 class Permissions
 {
+    use ResponseTrait;
     /**
      * Handle an incoming request.
      *
      * @param \Illuminate\Http\Request $request
      * @param \Closure(\Illuminate\Http\Request): (\Illuminate\Http\Response|\Illuminate\Http\RedirectResponse) $next
-     * @return \Illuminate\Http\Response|\Illuminate\Http\RedirectResponse
+     * @return \Illuminate\Http\JsonResponse
      */
     public function handle(Request $request, Closure $next)
     {
@@ -32,7 +33,7 @@ class Permissions
         if ($permissions){
             return $next($request);
         }else{
-            return Response::error('没有相关接口的权限');
+            return $this->error('没有相关接口的权限');
         }
     }
 }

@@ -1,16 +1,15 @@
 <?php
 
-namespace LaravelRpc\Http\Middleware;
+namespace LaravelRpc\Middleware;
 
 use Closure;
 use Illuminate\Encryption\Encrypter;
 use Illuminate\Http\Request;
-use LaravelRpc\Models\Client;
-use LaravelRpc\Params;
-use LaravelRpc\Response;
+use LaravelRpc\ResponseTrait;
 
 class Fixed
 {
+    use ResponseTrait;
     /**
      * Handle an incoming request.
      *
@@ -22,13 +21,13 @@ class Fixed
     {
         $verifyKey = config('laravel_rpc.verify_key');
         if (!$verifyKey){
-            return Response::error('请配置 verify_key');
+            return $this->error('请配置 verify_key');
         }
         $input = file_get_contents('php://input');
         try{
             $params = (new Encrypter(base64_decode($verifyKey),config('laravel_rpc.verify_cipher')))->decrypt($input);
         }catch (\Throwable $e){
-            return Response::error('参数解析失败');
+            return $this->error('参数解析失败');
         }
 
         $request->merge($params);

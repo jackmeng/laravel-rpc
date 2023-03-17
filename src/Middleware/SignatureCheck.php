@@ -1,15 +1,16 @@
 <?php
 
-namespace LaravelRpc\Http\Middleware;
+namespace LaravelRpc\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
 use LaravelRpc\Models\Client;
 use LaravelRpc\Params;
-use LaravelRpc\Response;
+use LaravelRpc\ResponseTrait;
 
 class SignatureCheck
 {
+    use ResponseTrait;
     /**
      * Handle an incoming request.
      *
@@ -22,7 +23,7 @@ class SignatureCheck
         $appid = $request->input('appid');
         $client = Client::where('appid',$appid)->first();
         if (!$client){
-            return Response::error('未找到客户端信息');
+            return $this->error('未找到客户端信息');
         }
         $secret = $client->secret;
         $inputParams = $request->except('sign');
@@ -30,7 +31,7 @@ class SignatureCheck
         if((new Params())->check($inputParams,$secret,$sign)){
             return $next($request);
         }else{
-            return Response::error('签名校验失败');
+            return $this->error('签名校验失败');
         }
 
     }

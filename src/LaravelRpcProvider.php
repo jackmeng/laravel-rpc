@@ -6,9 +6,8 @@ use Illuminate\Support\ServiceProvider;
 use LaravelRpc\Console\Commands\RpcClient;
 use LaravelRpc\Console\Commands\RpcClients;
 use LaravelRpc\Console\Commands\RpcGenerateKey;
-use LaravelRpc\Http\Controllers\RpcController;
-use LaravelRpc\Http\Middleware\Fixed;
-use LaravelRpc\Http\Middleware\SignatureCheck;
+use LaravelRpc\Middleware\Fixed;
+use LaravelRpc\Middleware\SignatureCheck;
 
 /**
  *
@@ -22,6 +21,10 @@ class LaravelRpcProvider extends ServiceProvider
         if (!app()->configurationIsCached()) {
             $this->mergeConfigFrom(__DIR__.'/../config/laravel_rpc.php', 'laravel_rpc');
         }
+
+        $this->app->singleton('laravel_rpc_client',function($app){
+            return new Client();
+        });
     }
 
     public function boot()
@@ -64,8 +67,8 @@ class LaravelRpcProvider extends ServiceProvider
         }
 
         Route::group(['prefix' => config('laravel_rpc.prefix', 'rpc')], function () {
-            Route::post('/server/sign',[RpcController::class,'request'] )->middleware(SignatureCheck::class);
-            Route::post('/server/fixed',[RpcController::class,'request'] )->middleware(Fixed::class);
+            Route::post('/server/sign',[LaravelRpc::class,'handle'] )->middleware(SignatureCheck::class);
+            Route::post('/server/fixed',[LaravelRpc::class,'handle'] )->middleware(Fixed::class);
         });
     }
 }

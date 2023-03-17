@@ -9,13 +9,15 @@ namespace LaravelRpc;
 
 class Service
 {
-    protected function success($data=[],$message='SUCCESS',$code=200)
+    protected ?Client $client = null;
+
+    public function __construct(Client $client)
     {
-        return Response::json($code,$message,$data);
+        $this->client = $client;
     }
 
-    protected function error($message='ERROR',$code=404,$data=[])
+    public function __call(string $name, array $arguments)
     {
-        return Response::json($code,$message,$data);
+        return $this->client->method($name,$arguments);
     }
 }

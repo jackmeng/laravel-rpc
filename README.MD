@@ -42,7 +42,7 @@ php artisan rpc_client
 
 调用客户端
 ```php
-(new TestClient())->service('Demo')->method('list',["page"=>1]);
+(new TestClient())->service('Demo')->list(1);
 ```
 也可以按Service定义client文件
 ```php

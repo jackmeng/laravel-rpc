@@ -10,24 +10,18 @@ namespace LaravelRpc;
 use Illuminate\Encryption\Encrypter;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
+use LaravelRpc\Enum\VerifyType;
 use LaravelRpc\Exceptions\ServerConfigDoesNotExistException;
+use LaravelRpc\Exceptions\UnknownVerifyTypeException;
 
 class Client
 {
-    protected array $request_params = [];
-    protected array $headers = [];
-    protected string $domain = '';
-    protected string $appid = '';
-    protected string $secret = '';
-    protected string $prefix = '';
-    protected string $server = '';
+    protected ?Server $server = null;
 
-    /**
-     * sign 注册客户端，利用appid 和 secret 验证签名
-     * fixed 利用aes加密，进行双向通信
-     */
-    protected string $verifyType = 'sign';
-    protected string $verifyKey = '';
+    protected array $request_params = [];
+
+    protected array $headers = [];
+
 
     public function __construct($server='')
     {
@@ -36,7 +30,6 @@ class Client
         }elseif(!empty($this->server)){
             $this->server($this->server);
         }
-        $this->service(class_basename(static::class));
     }
 
     /**
@@ -52,77 +45,7 @@ class Client
         if (empty($server_config)){
             throw new ServerConfigDoesNotExistException();
         }
-        $this->server = $server;
-        $this->setDomain($server_config['domain']??'');
-        $this->setAppid($server_config['appid']??'');
-        $this->setSecret($server_config['secret']??'');
-        $this->setPrefix($server_config['prefix']??'');
-        $this->setVerifyKey($server_config['verify_key']??'');
-
-        return $this;
-    }
-
-    /**
-     * @param $domain
-     * @return $this
-     * @author jackmeng <jiekemeng@gmail.com>
-     * @date 2023/2/10 0010 11:49
-     */
-    public function setDomain($domain)
-    {
-        $this->domain = rtrim($domain,'/');
-        return $this;
-    }
-
-    /**
-     * @param $appid
-     * @return $this
-     * @author jackmeng <jiekemeng@gmail.com>
-     * @date 2023/2/10 0010 11:49
-     */
-    public function setAppid($appid)
-    {
-        $this->request_params['appid'] = $appid;
-        $this->appid = $appid;
-
-        return $this;
-    }
-
-    /**
-     * @param $secret
-     * @return $this
-     * @author jackmeng <jiekemeng@gmail.com>
-     * @date 2023/2/10 0010 11:49
-     */
-    public function setSecret($secret)
-    {
-        $this->secret = $secret;
-
-        return $this;
-    }
-
-    /**
-     * @param $prefix
-     * @return $this
-     * @author jackmeng <jiekemeng@gmail.com>
-     * @date 2023/2/10 0010 11:49
-     */
-    public function setPrefix($prefix)
-    {
-        $this->prefix = trim($prefix,'/');
-
-        return $this;
-    }
-
-    /**
-     * @param $key
-     * @return $this
-     * @author jackmeng <jiekemeng@gmail.com>
-     * @date 2023/2/28 0028 17:54
-     */
-    public function setVerifyKey($key)
-    {
-        $this->verifyKey = $key;
+        $this->server = new Server($server_config);
 
         return $this;
     }
@@ -142,14 +65,15 @@ class Client
 
     /**
      * @param $service
-     * @return $this
+     * @return Service
      * @author jackmeng <jiekemeng@gmail.com>
      * @date 2023/2/10 0010 11:49
      */
-    public function service($service)
+    public function service($service): Service
     {
-        $this->request_params['service'] = $service;
-        return $this;
+        $this->request_params['service'] = Str::studly($service);
+
+        return new Service($this);
     }
 
     public function method($method, $params=[]): \Illuminate\Http\Client\Response
@@ -160,33 +84,42 @@ class Client
         return $this->request();
     }
 
+    public function invoke($path,$params=[])
+    {
+        $parsePath = explode($path,'/');
+        $method = array_pop($parsePath);
+        return $this->service(implode('/',$parsePath))->method($method,$params);
+    }
+
     protected function request(): \Illuminate\Http\Client\Response
     {
-        $this->header('verify-type',$this->verifyType);
+        $this->header('verify-type',$this->server->getVerifyType());
 
-        if ($this->verifyType === 'sign'){
+        if ($this->server->getVerifyType() === VerifyType::SIGN){
             return $this->verifySign();
-        }elseif($this->verifyType === 'fixed'){
+        }elseif($this->server->getVerifyType() === VerifyType::FIXED){
             return $this->verifyFixed();
         }
-
+        throw new UnknownVerifyTypeException();
     }
 
     protected function verifySign()
     {
         $this->request_params['nonce_str'] = Str::random();
-        $this->request_params['sign'] = (new Params())->signature($this->request_params,$this->secret);
-        return Http::withHeaders($this->headers)->post($this->getUrl(), $this->request_params);
+        $this->request_params['sign'] = (new Params())->signature($this->request_params,$this->server->getSecret());
+
+        return Http::withHeaders($this->headers)->post($this->server->getUrl(), $this->request_params);
     }
 
     protected function verifyFixed()
     {
-        $encryptParams = (new Encrypter(base64_decode(config('laravel_rpc.verify_key')),config('laravel_rpc.verify_cipher')))->encrypt($this->request_params);
-        return Http::withHeaders($this->headers)->withBody($encryptParams,'text/plain')->post($this->getUrl());
+        $encryptParams = (new Encrypter(base64_decode($this->server->getSecret()),$this->server->getVerifyCipher()))->encrypt($this->request_params);
+
+        return Http::withHeaders($this->headers)->withBody($encryptParams,'text/plain')->post($this->server->getUrl());
     }
 
-    protected function getUrl(): string
+    public function __get(string $name)
     {
-        return $this->domain.'/'.$this->prefix.'/server/'.$this->verifyType;
+        return $this->service($name);
     }
 }
