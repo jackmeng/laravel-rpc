@@ -26,7 +26,7 @@ class Server
         $this->setDomain($config['domain']??'');
         $this->setAppid($config['appid']??'');
         $this->setSecret($config['secret']??'');
-        $this->setPrefix($config['prefix']??'');
+        $this->setPrefix($config['route_prefix']??'');
         $this->setVerifyType($config['type']??'');
         $this->setVerifyCipher($config['verify_cipher']??'');
     }
