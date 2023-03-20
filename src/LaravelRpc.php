@@ -17,7 +17,7 @@ class LaravelRpc
     {
         $service = $request->input('service');
         $method = $request->input('method');
-        $params = json_decode($request->input('params'));
+        $params = $request->input('params');
         $service = str_replace('/','\\',$service);
         $service = config('laravel_rpc.root.namespace').'Services\\'.$service;
 
