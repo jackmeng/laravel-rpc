@@ -27,7 +27,7 @@ class Server
         $this->setAppid($config['appid']??'');
         $this->setSecret($config['secret']??'');
         $this->setPrefix($config['route_prefix']??'');
-        $this->setVerifyType($config['type']??'');
+        $this->setVerifyType($config['verify_type']??'');
         $this->setVerifyCipher($config['verify_cipher']??'');
     }
 

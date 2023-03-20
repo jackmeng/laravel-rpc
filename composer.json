@@ -26,5 +26,8 @@
                 "LaravelRpc\\LaravelRpcProvider"
             ]
         }
-    }
+    },
+  "require": {
+    "ext-json": "*"
+  }
 }

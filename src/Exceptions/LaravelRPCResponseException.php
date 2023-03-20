@@ -11,18 +11,49 @@ class LaravelRPCResponseException extends LaravelRpcException
 {
     protected $message = 'RPC 响应错误';
 
-    protected $errorInfo = [];
+    protected $errorMsg = '';
 
+    protected $errorData = [];
 
-    public function setErrorInfo($errorInfo)
+    /**
+     * @return string
+     */
+    public function getErrorMsg(): string
     {
-        $this->errorInfo = $errorInfo;
+        return $this->errorMsg;
+    }
+
+    /**
+     * @param string $errorMsg
+     */
+    public function setErrorMsg(string $errorMsg)
+    {
+        $this->errorMsg = $errorMsg;
 
         return $this;
     }
 
-    public function getErrorInfo()
+    /**
+     * @return array
+     */
+    public function getErrorData(): array
     {
-        return $this->errorInfo;
+        return $this->errorData;
     }
+
+    /**
+     * @param array $errorData
+     */
+    public function setErrorData(array $errorData)
+    {
+        $this->errorData = $errorData;
+
+        return $this;
+    }
+
+
+
+
+
+
 }

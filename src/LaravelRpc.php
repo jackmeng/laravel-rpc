@@ -17,7 +17,7 @@ class LaravelRpc
     {
         $service = $request->input('service');
         $method = $request->input('method');
-        $params = $request->input('params');
+        $params = json_decode($request->input('params'));
         $service = str_replace('/','\\',$service);
         $service = config('laravel_rpc.root.namespace').'Services\\'.$service;
 
@@ -33,9 +33,9 @@ class LaravelRpc
             $service_obj = app()->make($service);
             $method_params = (new \ReflectionMethod($service_obj,$method))->getParameters();
             $args = [];
-            // TODO: 如果参数有key ,就按key解析
-            // TODO: 如果没有key，则按顺序传入
-            // TODO: 如果是 string，int，boolean，则核对参数类型后传入
+            if (is_array(json_decode(json_encode($params)))){
+                return $service_obj->{$method}(...$params);
+            }
             foreach($method_params as $param){
                 if(!$param->isDefaultValueAvailable() && !isset($params[$param->name])){
                     return $this->error('请传入参数：'.$param->name);

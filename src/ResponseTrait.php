@@ -9,9 +9,14 @@ namespace LaravelRpc;
 
 trait ResponseTrait
 {
-    public function success($data=[])
+    public function responseJson($data=[])
     {
         return response()->json($data);
+    }
+
+    public function responseString(string $str)
+    {
+        return response($str);
     }
 
     public function error($message='error',$code=404,$data=[])

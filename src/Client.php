@@ -11,6 +11,8 @@ use Illuminate\Encryption\Encrypter;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use LaravelRpc\Enum\VerifyType;
+use LaravelRpc\Exceptions\LaravelRpcException;
+use LaravelRpc\Exceptions\LaravelRPCResponseException;
 use LaravelRpc\Exceptions\ServerConfigDoesNotExistException;
 use LaravelRpc\Exceptions\UnknownVerifyTypeException;
 
@@ -108,14 +110,37 @@ class Client
         $this->request_params['nonce_str'] = Str::random();
         $this->request_params['sign'] = (new Params())->signature($this->request_params,$this->server->getSecret());
 
-        return Http::withHeaders($this->headers)->post($this->server->getUrl(), $this->request_params);
+        try{
+            $res =  Http::withHeaders($this->headers)->post($this->server->getUrl(), $this->request_params);
+        }catch (\Throwable $e){
+            throw new LaravelRpcException('rpc 响应错误');
+        }
+
+        return $this->responseHandle($res);
     }
 
     protected function verifyFixed()
     {
         $encryptParams = (new Encrypter(base64_decode($this->server->getSecret()),$this->server->getVerifyCipher()))->encrypt($this->request_params);
 
-        return Http::withHeaders($this->headers)->withBody($encryptParams,'text/plain')->post($this->server->getUrl());
+        try{
+            $res =  Http::withHeaders($this->headers)->withBody($encryptParams,'text/plain')->post($this->server->getUrl());
+        }catch (\Throwable $e){
+            throw new LaravelRpcException('rpc 响应错误');
+        }
+
+        return $this->responseHandle($res);
+    }
+
+    protected function responseHandle(\Illuminate\Http\Client\Response &$res)
+    {
+        if ($res->status() === 200){
+            return $res;
+        }
+
+        throw (new LaravelRPCResponseException('rpc 错误'))
+            ->setErrorMsg($res->json('message',''))
+            ->setErrorData($res->json('data',[]));
     }
 
     public function __get(string $name)
