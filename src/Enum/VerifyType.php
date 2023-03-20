@@ -9,6 +9,6 @@ namespace LaravelRpc\Enum;
 
 class VerifyType
 {
-    const FIXED = 1;
-    const SIGN = 2;
+    const FIXED = 'fixed';
+    const SIGN = 'sign';
 }
